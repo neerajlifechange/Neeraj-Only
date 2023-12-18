@@ -18,30 +18,16 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
     async with async_playwright() as p:
         # Use Brave browser with specified executable path
         browser = await p.chromium.launch(
-            headless=True,
+            headless=False,  # Run the browser in non-headless mode
             executable_path="/usr/bin/brave-browser"
         )
         browser_type = p.chromium
         print(f"{thread_name} is using browser: {browser_type.name}")  # Print browser type
         context = await browser.new_context()
 
-        # Set the context permissions to allow microphone
-        permissions = ["microphone"]
-        await context.grant_permissions(permissions)
-
-        granted_permissions = await context._do_emit_playwright_and_handle_errors('context-grant-permissions', {
-            'permissions': permissions,
-            'origin': '',
-            'browserContextId': context._id,
-        })
-
-        print(f"{thread_name} Granted permissions: {granted_permissions}")
-
-        if not all(granted_permissions.values()):
-            print(f"{thread_name} Warning: Microphone permission not granted!")
-
         page = await context.new_page()
 
+        # Open the Zoom meeting page
         await page.goto(f'http://www.zoom.us/wc/join/{meetingcode}', timeout=200000)
 
         # Add some user interaction before joining audio
@@ -67,13 +53,13 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
             pass
 
         try:
+            # Wait for the user to manually allow microphone access
+            input("Please allow microphone access manually, then press Enter...")
+            
+            # Find and click the "Join Audio by Computer" button
             query = '//button[text()="Join Audio by Computer"]'
             await asyncio.sleep(13)
             mic_button_locator = await page.wait_for_selector(query, timeout=350000)
-
-            # Handle browser dialogs
-            page.on('dialog', lambda dialog: asyncio.ensure_future(dialog.accept()))
-
             await asyncio.sleep(10)
             await mic_button_locator.evaluate_handle('node => node.click()')
             print(f"{thread_name} microphone: Mic aayenge.")
