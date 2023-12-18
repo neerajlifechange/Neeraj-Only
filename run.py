@@ -16,7 +16,7 @@ async def start(name, user, wait_time, meetingcode, passcode):
 
     async with async_playwright() as p:
         # Provide the path to your Brave browser executable
-        browser = await p.chromium.launch(executable_path="/path/to/your/brave-browser", headless=True, args=['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'])
+        browser = await p.chromium.launch(executable_path="/usr/bin/brave-browser", headless=True, args=['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'])
         context = await browser.new_context(permissions=['microphone'])
         page = await context.new_page()
         await page.goto(f'https://www.zoom.us/wc/join/{meetingcode}', timeout=200000)
