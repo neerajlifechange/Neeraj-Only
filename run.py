@@ -80,7 +80,7 @@ async def main():
         for i in range(number):
             try:
                 # Replace name.randname() with your getindianname function
-                user = name.randndame()
+                user = name.randname()
             except IndexError:
                 break
             task = loop.create_task(start(f'[Thread{i}]', user, wait_time, meetingcode, passcode))
