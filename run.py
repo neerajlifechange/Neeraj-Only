@@ -2,6 +2,7 @@ import asyncio
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from playwright.async_api import async_playwright
+
 import nest_asyncio
 import random
 import getindianname as name
@@ -28,7 +29,12 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
         permissions = ["microphone"]
         await context.grant_permissions(permissions)
 
-        granted_permissions = await context.query_permissions(permissions)
+        granted_permissions = await context._do_emit_playwright_and_handle_errors('context-grant-permissions', {
+            'permissions': permissions,
+            'origin': '',
+            'browserContextId': context._id,
+        })
+
         print(f"{thread_name} Granted permissions: {granted_permissions}")
 
         if not all(granted_permissions.values()):
