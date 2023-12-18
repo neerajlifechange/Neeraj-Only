@@ -5,6 +5,7 @@ from playwright.async_api import async_playwright
 import nest_asyncio
 import getindianname as name  # Assuming you have a function to generate Indian names in this module
 
+import random
 nest_asyncio.apply()
 
 # Flag to indicate whether the script is running
@@ -79,7 +80,7 @@ async def main():
         for i in range(number):
             try:
                 # Replace name.randname() with your getindianname function
-                user = name.your_getindianname_function()
+                user = name.randndame()
             except IndexError:
                 break
             task = loop.create_task(start(f'[Thread{i}]', user, wait_time, meetingcode, passcode))
