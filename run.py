@@ -24,6 +24,10 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
         print(f"{thread_name} is using browser: {browser_type.name}")  # Print browser type
         context = await browser.new_context()
         page = await context.new_page()
+
+        # Set the context permissions to allow microphone
+        await context.grant_permissions(["microphone"])
+
         await page.goto(f'http://www.zoom.us/wc/join/{meetingcode}', timeout=200000)
 
         # Add some user interaction before joining audio
