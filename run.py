@@ -26,7 +26,10 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
         page = await context.new_page()
         await page.goto(f'http://www.zoom.us/wc/join/{meetingcode}', timeout=200000)
 
-        # ... rest of the code ...
+        # Add some user interaction before joining audio
+        await page.click('body')  # Click on the page to simulate user interaction
+
+        # ... (rest of the code) ...
 
         try:
             await page.click('//button[@id="onetrust-accept-btn-handler"]', timeout=5000)
@@ -51,6 +54,10 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
             query = '//button[text()="Join Audio by Computer"]'
             await asyncio.sleep(13)
             mic_button_locator = await page.wait_for_selector(query, timeout=350000)
+
+            # Handle browser dialogs
+            page.on('dialog', lambda dialog: asyncio.ensure_future(dialog.accept()))
+
             await asyncio.sleep(10)
             await mic_button_locator.evaluate_handle('node => node.click()')
             print(f"{thread_name} microphone: Mic aayenge.")
