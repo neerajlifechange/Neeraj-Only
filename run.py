@@ -23,17 +23,23 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
         browser_type = p.chromium
         print(f"{thread_name} is using browser: {browser_type.name}")  # Print browser type
         context = await browser.new_context()
-        page = await context.new_page()
 
         # Set the context permissions to allow microphone
-        await context.grant_permissions(["microphone"])
+        permissions = ["microphone"]
+        await context.grant_permissions(permissions)
+
+        granted_permissions = await context.query_permissions(permissions)
+        print(f"{thread_name} Granted permissions: {granted_permissions}")
+
+        if not all(granted_permissions.values()):
+            print(f"{thread_name} Warning: Microphone permission not granted!")
+
+        page = await context.new_page()
 
         await page.goto(f'http://www.zoom.us/wc/join/{meetingcode}', timeout=200000)
 
         # Add some user interaction before joining audio
         await page.click('body')  # Click on the page to simulate user interaction
-
-        # ... (rest of the code) ...
 
         try:
             await page.click('//button[@id="onetrust-accept-btn-handler"]', timeout=5000)
