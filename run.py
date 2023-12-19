@@ -14,12 +14,9 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
     print(f"{thread_name} started!")
 
     async with async_playwright() as p:
-        # Use Brave browser with specified executable path
-        browser = await p.firefox.launch(
-            headless=True,
-            executable_path="/usr/local/bin/firefox"
-        )
-        browser_type = p.chromium
+        # Use Firefox browser with default configurations
+        browser = await p.firefox.launch(headless=True)
+        browser_type = p.firefox
         print(f"{thread_name} is using browser: {browser_type.name}")  # Print browser type
         context = await browser.new_context()
         page = await context.new_page()
