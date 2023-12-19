@@ -16,7 +16,7 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
     async with async_playwright() as p:
         # Use Brave browser with specified executable path
         browser = await p.chromium.launch(
-            headless=True,
+            headless=True,  # Open a non-headless browser
             executable_path="/usr/bin/brave-browser"
         )
         browser_type = p.chromium
@@ -54,20 +54,7 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
             await mic_button_locator.evaluate_handle('node => node.click()')
             print(f"{thread_name} microphone: Mic aayenge.")
             
-            # Wait for permissions prompt
-            permissions_prompt = await page.wait_for_selector('//button[text()="Allow"]', timeout=20000)
-            await permissions_prompt.click()
-            
-            # Enable microphone permissions
-            await page.evaluate('''
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(function(stream) {
-                        console.log("Microphone access granted!");
-                    })
-                    .catch(function(error) {
-                        console.error("Microphone access denied:", error);
-                    });
-            ''')
+            # Now manually interact with the browser window to allow microphone access
             
         except Exception as e:
             print(f"{thread_name} microphone: Mic nahe aayenge. ", e)
