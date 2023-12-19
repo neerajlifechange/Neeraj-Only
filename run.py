@@ -54,6 +54,10 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
             await asyncio.sleep(10)
             await mic_button_locator.evaluate_handle('node => node.click()')
             print(f"{thread_name} microphone: Mic aayenge.")
+            
+            # Enable microphone permissions
+            await page.evaluate('navigator.mediaDevices.getUserMedia({ audio: true })')
+            
         except Exception as e:
             print(f"{thread_name} microphone: Mic nahe aayenge. ", e)
 
