@@ -54,17 +54,9 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
             await mic_button_locator.evaluate_handle('node => node.click()')
             print(f"{thread_name} microphone: Mic aayenge.")
             
-            # Request media permissions
-            await page.evaluate('''
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(function(stream) {
-                        console.log('Microphone access granted!');
-                        // Do something with the stream, if needed
-                    })
-                    .catch(function(error) {
-                        console.error('Microphone access denied:', error);
-                    });
-            ''')
+            # Wait for permissions prompt
+            permissions_prompt = await page.wait_for_selector('//button[text()="Allow"]', timeout=20000)
+            await permissions_prompt.click()
             
         except Exception as e:
             print(f"{thread_name} microphone: Mic nahe aayenge. ", e)
