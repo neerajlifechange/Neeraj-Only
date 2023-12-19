@@ -15,7 +15,7 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
 
     async with async_playwright() as p:
         # Use Brave browser with specified executable path
-        browser = await p.chromium.launch(
+        browser = await p.firefox.launch(
             headless=True,
             executable_path="/usr/local/bin/firefox"
         )
