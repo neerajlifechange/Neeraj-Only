@@ -1,4 +1,5 @@
 import asyncio
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from playwright.async_api import async_playwright
 import nest_asyncio
@@ -14,15 +15,17 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
     print(f"{thread_name} started!")
 
     async with async_playwright() as p:
-        # Use Firefox browser with default configurations
-        browser = await p.firefox.launch(headless=True)
-        browser_type = p.firefox
-        print(f"{thread_name} is using browser: {browser_type.name}")  # Print browser type
+        browser = await p.chromium.launch(
+            headless=True,
+            executable_path="/usr/bin/brave-browser"
+        )
+        browser_type = p.chromium
+        print(f"{thread_name} is using browser: {browser_type.name}")
+        
+        # Create a new browser context
         context = await browser.new_context()
         page = await context.new_page()
         await page.goto(f'http://www.zoom.us/wc/join/{meetingcode}', timeout=200000)
-
-        # ... rest of the code ...
 
         try:
             await page.click('//button[@id="onetrust-accept-btn-handler"]', timeout=5000)
@@ -46,15 +49,11 @@ async def start(thread_name, user, wait_time, meetingcode, passcode):
         try:
             query = '//button[text()="Join Audio by Computer"]'
             await asyncio.sleep(13)
-            mic_button_locator = await page.wait_for_selector(query, timeout=350000)
-            await asyncio.sleep(10)
-            await mic_button_locator.evaluate_handle('node => node.click()')
             print(f"{thread_name} microphone: Mic aayenge.")
-            
-            # Wait for permissions prompt
-            permissions_prompt = await page.wait_for_selector('//button[text()="Allow"]', timeout=20000)
-            await permissions_prompt.click()
-            
+            while running:  # Added a loop to continuously click the button
+                mic_button_locator = await page.wait_for_selector(query, timeout=350000)
+                await asyncio.sleep(10)
+                await mic_button_locator.evaluate_handle('node => node.click()')
         except Exception as e:
             print(f"{thread_name} microphone: Mic nahe aayenge. ", e)
 
@@ -80,7 +79,6 @@ async def main():
         tasks = []
         for i in range(number):
             try:
-                # Replace name.randname() with your getindianname function
                 user = name.randname()
             except IndexError:
                 break
@@ -90,7 +88,6 @@ async def main():
             await asyncio.gather(*tasks)
         except KeyboardInterrupt:
             running = False
-            # Wait for tasks to complete
             await asyncio.gather(*tasks, return_exceptions=True)
 
 if __name__ == '__main__':
