@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from faker import Faker
 from playwright.async_api import async_playwright
 import nest_asyncio
+import requests
 
 nest_asyncio.apply()
 
@@ -28,25 +29,25 @@ async def grant_permissions(page):
     except Exception as e:
         sync_print(f"Error granting microphone permission: {e}")
 
-async def start(thread_name, wait_time, meetingcode, passcode):
+async def start(name, wait_time, meetingcode, passcode, zoom_url):
     user = fake.name()
-    sync_print(f"{thread_name} started! User: {user}")
+    sync_print(f"{name} started! User: {user}")
 
     async with async_playwright() as p:
-        # Modified lines
         browser = await p.chromium.launch(
             headless=True,
-            executable_path="/usr/bin/brave-browser"
+            args=[
+                '--use-fake-device-for-media-stream',
+                '--use-fake-ui-for-media-stream',
+                f'--exec-path=/usr/bin/microsoft-edge'
+            ]
         )
-        browser_type = p.chromium
-        print(f"{thread_name} is using browser: {browser_type.name}")
-
         context = await browser.new_context(permissions=['microphone'])
         page = await context.new_page()
 
         await grant_permissions(page)
 
-        await page.goto(f'https://zoom.us/wc/join/{meetingcode}', timeout=200000)
+        await page.goto(zoom_url, timeout=200000)
 
         try:
             await page.click('//button[@id="onetrust-accept-btn-handler"]', timeout=5000)
@@ -69,14 +70,14 @@ async def start(thread_name, wait_time, meetingcode, passcode):
             mic_button_locator = await page.wait_for_selector(query, timeout=200000)
             await mic_button_locator.wait_for_element_state('stable', timeout=200000)
             await mic_button_locator.evaluate_handle('node => node.click()')
-            sync_print(f"{thread_name} mic aayenge.")
+            sync_print(f"{name} mic aayenge.")
 
             # Take a screenshot after clicking "Join Audio by Computer" button
-            await page.screenshot(path=f"{thread_name}_after_join_audio.png")
+            await page.screenshot(path=f"{name}_after_join_audio.png")
 
         except Exception as e:
             print(e)
-            sync_print(f"{thread_name} mic nhi aayenge.")
+            sync_print(f"{name} mic nhi aayenge.")
 
         # ... (remaining code)
 
@@ -84,27 +85,36 @@ async def start(thread_name, wait_time, meetingcode, passcode):
         await asyncio.sleep(30)
 
         # Take a screenshot after 30 seconds
-        await page.screenshot(path=f"{thread_name}_after_30_seconds.png")
+        await page.screenshot(path=f"{name}_after_30_seconds.png")
 
-        sync_print(f"{thread_name} sleep for {wait_time} seconds ...")
+        sync_print(f"{name} sleep for {wait_time} seconds ...")
         await asyncio.sleep(wait_time)
-        sync_print(f"{thread_name} ended!")
+        sync_print(f"{name} ended!")
 
         await browser.close()
 
+async def get_zoom_url():
+    # Fetch Zoom URL from GitHub
+    github_url = 'https://raw.githubusercontent.com/AmitKehrwal/FunHindi/master/Zoom.txt'
+    response = requests.get(github_url)
+    zoom_url = response.text.strip()
+    return zoom_url
+
 async def main():
     number = int(input("Enter number of Users: "))
-    meetingcode = input("Enter meeting code (No Space): ")
     passcode = input("Enter Password (No Space): ")
 
     sec = 60
     wait_time = sec * 60
 
+    # Fetch Zoom URL from GitHub
+    meetingcode = await get_zoom_url()
+
     with ThreadPoolExecutor(max_workers=number) as executor:
         loop = asyncio.get_event_loop()
         tasks = []
         for i in range(number):
-            task = loop.create_task(start(f'[Thread{i}]', wait_time, meetingcode, passcode))
+            task = loop.create_task(start(f'[Thread{i}]', wait_time, meetingcode, passcode, meetingcode))
             tasks.append(task)
         await asyncio.gather(*tasks)
 
