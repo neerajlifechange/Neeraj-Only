@@ -28,19 +28,19 @@ async def grant_permissions(page):
     except Exception as e:
         sync_print(f"Error granting microphone permission: {e}")
 
-async def start(name, wait_time, meetingcode, passcode):
+async def start(thread_name, wait_time, meetingcode, passcode):
     user = fake.name()
-    sync_print(f"{name} started! User: {user}")
+    sync_print(f"{thread_name} started! User: {user}")
 
     async with async_playwright() as p:
+        # Modified lines
         browser = await p.chromium.launch(
             headless=True,
-            args=[
-                '--use-fake-device-for-media-stream',
-                '--use-fake-ui-for-media-stream',
-                f'--exec-path=/usr/bin/brave-browser'
-            ]
+            executable_path="/usr/bin/brave-browser"
         )
+        browser_type = p.chromium
+        print(f"{thread_name} is using browser: {browser_type.name}")
+
         context = await browser.new_context(permissions=['microphone'])
         page = await context.new_page()
 
@@ -69,14 +69,14 @@ async def start(name, wait_time, meetingcode, passcode):
             mic_button_locator = await page.wait_for_selector(query, timeout=200000)
             await mic_button_locator.wait_for_element_state('stable', timeout=200000)
             await mic_button_locator.evaluate_handle('node => node.click()')
-            sync_print(f"{name} mic aayenge.")
+            sync_print(f"{thread_name} mic aayenge.")
 
             # Take a screenshot after clicking "Join Audio by Computer" button
-            await page.screenshot(path=f"{name}_after_join_audio.png")
+            await page.screenshot(path=f"{thread_name}_after_join_audio.png")
 
         except Exception as e:
             print(e)
-            sync_print(f"{name} mic nhi aayenge.")
+            sync_print(f"{thread_name} mic nhi aayenge.")
 
         # ... (remaining code)
 
@@ -84,11 +84,11 @@ async def start(name, wait_time, meetingcode, passcode):
         await asyncio.sleep(30)
 
         # Take a screenshot after 30 seconds
-        await page.screenshot(path=f"{name}_after_30_seconds.png")
+        await page.screenshot(path=f"{thread_name}_after_30_seconds.png")
 
-        sync_print(f"{name} sleep for {wait_time} seconds ...")
+        sync_print(f"{thread_name} sleep for {wait_time} seconds ...")
         await asyncio.sleep(wait_time)
-        sync_print(f"{name} ended!")
+        sync_print(f"{thread_name} ended!")
 
         await browser.close()
 
