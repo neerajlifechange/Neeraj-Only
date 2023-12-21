@@ -1,0 +1,2 @@
+zoom_url = "http://www.zoom.us/wc/join/82770760919"
+passcode = "468111"
