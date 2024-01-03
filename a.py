@@ -1,14 +1,20 @@
 import subprocess
-import os
 
-# Clone the repository
-subprocess.run(["git", "clone", "https://github.com/neerajlifechange/Neeraj-Only.git"])
+# Install required packages
+subprocess.run(["pip", "install", "playwright"])
+subprocess.run(["pip", "install", "beautifulsoup4"])
+subprocess.run(["pip", "install", "requests"])
+subprocess.run(["pip", "install", "indian-names"])
+subprocess.run(["playwright", "install"])
+subprocess.run(["playwright", "install-deps"])
 
-# Change to the repository directory
-os.chdir("Neeraj-Only")
+# Install required system packages
+subprocess.run(["apt", "install", "firefox", "-y"])
+subprocess.run(["apt", "install", "wget", "-y"])
 
-# Give execution permission to install_brave.sh
-subprocess.run(["chmod", "+x", "Brave.sh"])
-
-# Run install_brave.sh
-subprocess.run(["./Brave.sh"])
+# Download and install GeckoDriver
+geckodriver_url = "https://github.com/mozilla/geckodriver/releases/download/v0.30.0/geckodriver-v0.30.0-linux64.tar.gz"
+subprocess.run(["wget", geckodriver_url])
+subprocess.run(["tar", "-xvzf", "geckodriver-v0.30.0-linux64.tar.gz"])
+subprocess.run(["chmod", "+x", "geckodriver"])
+subprocess.run(["mv", "geckodriver", "/usr/local/bin/"])
