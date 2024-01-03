@@ -1,21 +1,23 @@
 #!/bin/bash
 
-# Install curl
-sudo apt-get install -y curl
+import subprocess
 
-# Download the Brave browser keyring
-sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+# Install required packages
+subprocess.run(["pip", "install", "playwright"])
+subprocess.run(["pip", "install", "beautifulsoup4"])
+subprocess.run(["pip", "install", "requests"])
+subprocess.run(["pip", "install", "indian-names"])
+subprocess.run(["playwright", "install"])
+subprocess.run(["playwright", "install-deps"])
 
-# Add Brave browser repository to sources.list.d
-echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+# Install required system packages
+subprocess.run(["apt", "install", "firefox", "-y"])
+subprocess.run(["apt", "install", "wget", "-y"])
 
-# Update package list
-sudo apt-get update
+# Download and install GeckoDriver
+geckodriver_url = "https://github.com/mozilla/geckodriver/releases/download/v0.30.0/geckodriver-v0.30.0-linux64.tar.gz"
+subprocess.run(["wget", geckodriver_url])
+subprocess.run(["tar", "-xvzf", "geckodriver-v0.30.0-linux64.tar.gz"])
+subprocess.run(["chmod", "+x", "geckodriver"])
+subprocess.run(["mv", "geckodriver", "/usr/local/bin/"])
 
-# Install Brave browser
-sudo apt-get install -y brave-browser
-
-# Install Python packages
-pip install playwright
-playwright install
-pip install faker
